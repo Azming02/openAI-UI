@@ -6,6 +6,7 @@ import MessageItem from './MessageItem'
 import SystemRoleSettings from './SystemRoleSettings'
 import ErrorMessageItem from './ErrorMessageItem'
 import type { ChatMessage, ErrorMessage } from '@/types'
+import { log } from 'astro/dist/core/logger/core'
 
 export default () => {
   let inputRef: HTMLTextAreaElement
@@ -97,8 +98,9 @@ export default () => {
           content: currentSystemRoleSettings(),
         })
       }
-      const timestamp = Date.now()
-      const response = await fetch('/api/generate', {
+      const timestamp = Date.now()    // 当前时间
+      const response = await fetch('http://192.168.22.33:5000/v1/chat/completions', {
+      // const response = await fetch('/api/generate', {
         method: 'POST',
         body: JSON.stringify({
           messages: requestMessageList,
@@ -112,16 +114,15 @@ export default () => {
         }),
         signal: controller.signal,
       })
-      if (!response.ok) {
+      if (!response.ok) {  // 请求失败
         const error = await response.json()
         console.error(error.error)
         setCurrentError(error.error)
         throw new Error('Request failed')
       }
       const data = response.body
-      if (!data)
+      if (!data)   // 没有数据返回
         throw new Error('No data')
-
       const reader = data.getReader()
       const decoder = new TextDecoder('utf-8')
       let done = false
@@ -129,15 +130,32 @@ export default () => {
       while (!done) {
         const { value, done: readerDone } = await reader.read()
         if (value) {
-          const char = decoder.decode(value)
-          if (char === '\n' && currentAssistantMessage().endsWith('\n'))
-            continue
-
-          if (char)
-            setCurrentAssistantMessage(currentAssistantMessage() + char)
-
-          isStick() && instantToBottom()
-        }
+          // const char = decoder.decode(value)
+          // if (char === '\n' && currentAssistantMessage().endsWith('\n'))
+          //   continue
+// 
+          // if (char)
+          //   setCurrentAssistantMessage(currentAssistantMessage() + char)
+// 
+          // isStick() && instantToBottom()
+          // 处理每一行数据
+          const chunk = decoder.decode(value, { stream: true });
+          chunk.split('\n').forEach(line => {
+            const trimmedLine = line.trim();
+            if (trimmedLine.startsWith('data:')) { // 确保行以 "data:" 开头
+              try {
+                const jsonData = JSON.parse(trimmedLine.slice(5).trim()); // 去掉前面的 "data: " 并修剪空格
+                const content = jsonData.choices[0].delta.content;   // 新解析的信息
+                if (content) {
+                  setCurrentAssistantMessage(currentAssistantMessage() + content);  // 拼接内容
+                  isStick() && instantToBottom();
+                }
+              } catch (error) {
+                console.error('Error parsing JSON:', error);
+              }
+            }
+        });
+      }
         done = readerDone
       }
     } catch (e) {
@@ -262,11 +280,11 @@ export default () => {
         </div>
       </Show>
       <div class="fixed bottom-5 left-5 rounded-md hover:bg-slate/10 w-fit h-fit transition-colors active:scale-90" class:stick-btn-on={isStick()}>
-        <div>
-          <button class="p-2.5 text-base" title="stick to bottom" type="button" onClick={() => setStick(!isStick())}>
-            <div i-ph-arrow-line-down-bold />
-          </button>
-        </div>
+        {/* <div> */}
+          {/* <button class="p-2.5 text-base" title="stick to bottom" type="button" onClick={() => setStick(!isStick())}> */}
+            {/* <div i-ph-arrow-line-down-bold /> */}
+          {/* </button> */}
+        {/* </div> */}
       </div>
     </div>
   )

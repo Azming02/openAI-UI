@@ -32,9 +32,10 @@ export default (props: Props) => {
         <Show when={props.currentSystemRoleSettings()}>
           <div>
             <div class="fi gap-1 op-50 dark:op-60">
-              <Show when={props.canEdit()} fallback={<IconEnv />}>
+              {/* 取消动态设置系统信息、温度参数 */}
+              {/* <Show when={props.canEdit()} fallback={<IconEnv />}>
                 <span onClick={() => props.setCurrentSystemRoleSettings('')} class="sys-edit-btn p-1 rd-50%" > <IconX /> </span>
-              </Show>
+              </Show> */}
               <span>System Role ( Temp = {temperature()} ) : </span>
             </div>
             <div class="mt-1">
@@ -42,12 +43,12 @@ export default (props: Props) => {
             </div>
           </div>
         </Show>
-        <Show when={!props.currentSystemRoleSettings() && props.canEdit()}>
+        {/* <Show when={!props.currentSystemRoleSettings() && props.canEdit()}>
           <span onClick={() => props.setSystemRoleEditing(!props.systemRoleEditing())} class="sys-edit-btn">
             <IconEnv />
             <span>Add System Role</span>
           </span>
-        </Show>
+        </Show> */}
       </Show>
       <Show when={props.systemRoleEditing() && props.canEdit()}>
         <div>
