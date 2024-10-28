@@ -20,7 +20,7 @@ export default ({ role, message, showRetry, onRetry }: Props) => {
     // user: 'bg-gradient-to-r from-purple-400 to-yellow-400',
     // assistant: 'bg-gradient-to-r from-yellow-200 via-green-200 to-green-300',
     system: 'system-avatar-url.png',
-    user: 'bg-gradient-to-r from-purple-400 to-yellow-400',
+    user: './public/user.png',
     assistant: './public/pwa-192.png',
   }
   const [source] = createSignal('')
@@ -82,11 +82,11 @@ export default ({ role, message, showRetry, onRetry }: Props) => {
     >
       {/*  头像样式  */}
       {/* <div class={`shrink-0 w-7 h-7 mt-4 rounded-full op-80 ${roleClass[role]}`} /> */}
-      {role === 'assistant' ? (
+      {role === 'assistant' || role === 'user' ? (
           <img
             src={roleClass[role]}
             alt="avatar"
-            class="shrink-0 w-7 h-7 mt-4 rounded-full op-80"
+            class="shrink-0 w-7 h-7 mt-4 rounded-full op-90"
           />
         ) : (
           <div class={`shrink-0 w-7 h-7 mt-4 rounded-full op-80 ${roleClass[role]}`} />
