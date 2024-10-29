@@ -1,10 +1,10 @@
-import { createSignal } from 'solid-js'
+import { createSignal, onMount } from 'solid-js'
 import MarkdownIt from 'markdown-it'
 import mdKatex from 'markdown-it-katex'
 import mdHighlight from 'markdown-it-highlightjs'
 import { useClipboard, useEventListener } from 'solidjs-use'
 import IconRefresh from './icons/Refresh'
-import type { Accessor } from 'solid-js'
+import type { Accessor} from 'solid-js'
 import type { ChatMessage } from '@/types'
 
 interface Props {
@@ -21,7 +21,7 @@ export default ({ role, message, showRetry, onRetry }: Props) => {
     // assistant: 'bg-gradient-to-r from-yellow-200 via-green-200 to-green-300',
     system: 'system-avatar-url.png',
     user: './public/user.png',
-    assistant: './public/pwa-192.png',
+    assistant: './public/logo.png',
   }
   const [source] = createSignal('')
   const { copy, copied } = useClipboard({ source, copiedDuring: 1000 })
@@ -70,7 +70,11 @@ export default ({ role, message, showRetry, onRetry }: Props) => {
 
     return ''
   }
-
+  
+  onMount(() => {
+    window.scrollTo(0, document.body.scrollHeight)
+  })
+  
   return (
     // <div class="py-2 -mx-4 px-4 transition-colors md:hover:bg-slate/3">
     <div class="py-2 -mx-4 px-4 md:hover:bg-slate/5">

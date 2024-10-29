@@ -99,6 +99,9 @@ export default () => {
         })
       }
       const timestamp = Date.now()    // 当前时间
+      const params = new URLSearchParams(window.location.search)
+      const token = params.get('token')   // 拿到token
+
       const response = await fetch('http://192.168.22.33:5000/v1/chat/completions', {
       // const response = await fetch('/api/generate', {
         method: 'POST',
@@ -110,6 +113,7 @@ export default () => {
             t: timestamp,
             m: requestMessageList?.[requestMessageList.length - 1]?.content || '',
           }),
+          sessionId: token,
           temperature: temperature(),
         }),
         signal: controller.signal,

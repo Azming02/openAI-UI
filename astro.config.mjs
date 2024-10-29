@@ -58,6 +58,10 @@ export default defineConfig({
       },
     }),
   ],
+  server: {
+    port: 5002, // 端口号
+    host: true, // 允许所有接口访问
+  },
   output: 'server',
   adapter: envAdapter(),
   vite: {
