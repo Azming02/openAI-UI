@@ -102,7 +102,8 @@ export default () => {
       const params = new URLSearchParams(window.location.search)
       const token = params.get('token')   // 拿到token
 
-      const response = await fetch('http://192.168.22.33:5000/v1/chat/completions', {
+      // const response = await fetch('http://192.168.22.33:5000/v1/chat/completions', {
+      const response = await fetch('https://rag.addcn.com/v1/chat/completions', {
       // const response = await fetch('/api/generate', {
         method: 'POST',
         body: JSON.stringify({
