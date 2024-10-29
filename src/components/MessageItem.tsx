@@ -21,7 +21,7 @@ export default ({ role, message, showRetry, onRetry }: Props) => {
     // assistant: 'bg-gradient-to-r from-yellow-200 via-green-200 to-green-300',
     system: 'system-avatar-url.png',
     user: './public/user.png',
-    assistant: './public/logo.png',
+    assistant: './public/pwa-192.png',
   }
   const [source] = createSignal('')
   const { copy, copied } = useClipboard({ source, copiedDuring: 1000 })
