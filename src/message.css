@@ -32,4 +32,5 @@
   background-color: var(--primary);
   color: #00000060;
   font-weight: bold; /* 加粗字体 */
+  background-color: rgba(148,163,184,var(--un-bg-opacity))
 }
