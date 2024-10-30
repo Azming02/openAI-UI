@@ -24,3 +24,12 @@
 .message table tbody tr:last-of-type {
   border-bottom: 2px solid #64748b40;
 }
+
+.send-button {    /*发送按钮 */
+  width: auto; /* 确保宽度自适应内容 */
+  white-space: nowrap; /* 防止文字换行 */
+  font-size: 13px; /* 调整字体大小 */
+  background-color: var(--primary);
+  color: #00000060;
+  font-weight: bold; /* 加粗字体 */
+}
