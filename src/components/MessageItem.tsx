@@ -90,14 +90,15 @@ export default ({ role, message, showRetry, onRetry }: Props) => {
           <img
             src={roleClass[role]}
             alt="avatar"
-            class="shrink-0 w-7 h-7 mt-4 rounded-full op-90"
+            // mt-1 适用于有度弹窗， mt-4 适用于浏览器
+            class="shrink-0 w-7 h-7 mt-1 rounded-full op-90"
           />
         ) : (
           <div class={`shrink-0 w-7 h-7 mt-4 rounded-full op-80 ${roleClass[role]}`} />
         )}
       <div
-      // ml-auto 将消息文本 推到最右侧
-        class={`message prose break-words overflow-hidden ${role === 'user' ? 'text-right ml-auto' : ''}`}
+      // ml-auto 将消息文本 推到最右侧， p-1 适用于有度弹窗， 浏览器不需要调整内边距（mt-4）
+        class={`message prose break-words overflow-hidden p-1 ${role === 'user' ? 'text-right ml-auto' : ''}`}
         innerHTML={htmlString()}
       />
     </div>
