@@ -86,8 +86,13 @@ export default () => {
 
   onMount(async () => {
     // 页面加载时将光标聚焦到输入框
+    const keepFocus = (event: FocusEvent) => {
+      event.preventDefault();
+      inputRef.focus();
+    };
     if (inputRef) {
       inputRef.focus();
+      window.addEventListener('focusout', keepFocus);
     }
     let lastPostion = window.scrollY;
     
