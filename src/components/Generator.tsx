@@ -90,16 +90,12 @@ export default () => {
       event.preventDefault();
       inputRef.focus();
     };
-    setTimeout(() => {
-      if (inputRef) {
+    if (inputRef) {
+      setTimeout(() => {
         inputRef.focus();
-        window.addEventListener('focusout', keepFocus);
-      }
-    }, 0)
-    // if (inputRef) {
-    //   inputRef.focus();
-    //   window.addEventListener('focusout', keepFocus);
-    // }
+      }, 0);
+      window.addEventListener('focusout', keepFocus);
+    }
     let lastPostion = window.scrollY;
     
     window.addEventListener('scroll', () => {
