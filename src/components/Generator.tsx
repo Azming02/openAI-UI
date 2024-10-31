@@ -21,7 +21,9 @@ export default () => {
   const temperatureSetting = (value: number) => { setTemperature(value); };
   const maxHistoryMessages = parseInt(import.meta.env.PUBLIC_MAX_HISTORY_MESSAGES || '9');
 
+  
   createEffect(() => (isStick() && smoothToBottom()));
+  
 
   // IndexedDB setup
   const dbName = 'chatApp';
@@ -83,8 +85,12 @@ export default () => {
   }
 
   onMount(async () => {
+    // 页面加载时将光标聚焦到输入框
+    if (inputRef) {
+      inputRef.focus();
+    }
     let lastPostion = window.scrollY;
-
+    
     window.addEventListener('scroll', () => {
       const nowPostion = window.scrollY;
       nowPostion < lastPostion && setStick(false);
