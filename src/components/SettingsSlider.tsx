@@ -2,6 +2,8 @@ import { Slider } from './Slider'
 import type { SettingsUI, SettingsUISlider } from '@/types/provider'
 import type { Accessor } from 'solid-js'
 
+// 实现一个设置界面的滑块组件
+
 interface Props {
   settings: SettingsUI
   editing: Accessor<boolean>
@@ -10,6 +12,7 @@ interface Props {
 }
 
 const SettingsNotDefined = () => {
+  // 当设置未定义时显示“Not Defined”。
   return (
     <div class="op-25">Not Defined</div>
   )

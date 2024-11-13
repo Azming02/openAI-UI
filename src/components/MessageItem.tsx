@@ -6,7 +6,7 @@ import { useClipboard, useEventListener } from 'solidjs-use'
 import IconRefresh from './icons/Refresh'
 import type { Accessor} from 'solid-js'
 import type { ChatMessage } from '@/types'
-
+// 聊天框样式
 interface Props {
   role: ChatMessage['role']
   message: Accessor<string> | string
@@ -15,6 +15,7 @@ interface Props {
 }
 
 export default ({ role, message, showRetry, onRetry }: Props) => {
+  // 聊天框 三个角色的头像
   const roleClass = {
     // system: 'bg-gradient-to-r from-gray-300 via-gray-200 to-gray-300',
     // user: 'bg-gradient-to-r from-purple-400 to-yellow-400',

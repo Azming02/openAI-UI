@@ -8,114 +8,144 @@ import ErrorMessageItem from './ErrorMessageItem';
 import type { ChatMessage, ErrorMessage } from '@/types';
 
 export default () => {
+  // 定义一个inputRef变量， 用于引用文本区域元素
   let inputRef: HTMLTextAreaElement;
+  // 创建currentSystemRoleSettings 信号和其更新函数。
   const [currentSystemRoleSettings, setCurrentSystemRoleSettings] = createSignal('');
+  // 信号，指示系统角色是否正在编辑
   const [systemRoleEditing, setSystemRoleEditing] = createSignal(false);
+  // 用于存储聊天消息列表
   const [messageList, setMessageList] = createSignal<ChatMessage[]>([]);
+  // 存储当前错误信息
   const [currentError, setCurrentError] = createSignal<ErrorMessage>();
+  // 存储当前助手消息
   const [currentAssistantMessage, setCurrentAssistantMessage] = createSignal('');
+  // 指示是否正在加载
   const [loading, setLoading] = createSignal(false);
+  // 控制请求的终止
   const [controller, setController] = createSignal<AbortController>(null);
+  // 指示是否固定滚动到底部
   const [isStick, setStick] = createSignal(false);
+  // 设置对话生成的温度参数。
   const [temperature, setTemperature] = createSignal(0.6);
+  // 定义 temperatureSetting 函数，用于更新温度设置。
   const temperatureSetting = (value: number) => { setTemperature(value); };
+  // 从环境变量中获取最大历史消息数，默认为 9。
   const maxHistoryMessages = parseInt(import.meta.env.PUBLIC_MAX_HISTORY_MESSAGES || '9');
 
-  
+  // 当isStick为true时，平滑滚动到底部
   createEffect(() => (isStick() && smoothToBottom()));
   
 
-  // IndexedDB setup
-  const dbName = 'chatApp';
-  const storeName = 'settings';
+  
+  const dbName = 'chatApp';  // 数据库名称
+  const storeName = 'settings';  // 对象存储名称
 
+  // 用于打开 IndexedDB数据库
   function openDatabase() {
     return new Promise((resolve, reject) => {
-      const request = indexedDB.open(dbName, 1);
+      const request = indexedDB.open(dbName, 1);   // 打开IndexedDB数据库，版本为1
 
+      // 处理数据库升级事件
       request.onupgradeneeded = (event) => {
-        const db = event.target.result;
+        // 获取数据库实例
+        const db = (event.target as IDBOpenDBRequest).result;
         if (!db.objectStoreNames.contains(storeName)) {
+          // 如果不存在，创建对象存储，使用id作为键路径
           db.createObjectStore(storeName, { keyPath: 'id' });
         }
       };
 
       request.onsuccess = (event) => {
-        resolve(event.target.result);
+        resolve((event.target as IDBOpenDBRequest).result);
       };
 
       request.onerror = (event) => {
-        reject(event.target.error);
+        reject((event.target as IDBOpenDBRequest).error);
       };
     });
   }
 
+  // 异步函数，用于从数据库获取数据
   async function getFromDB(key) {
-    const db = await openDatabase();
+    // 等待数据库打开
+    const db = await openDatabase() as IDBDatabase;
     return new Promise((resolve, reject) => {
-      const transaction = db.transaction([storeName], 'readonly');
-      const store = transaction.objectStore(storeName);
-      const request = store.get(key);
+      const transaction = db.transaction([storeName], 'readonly');  // 只读事务
+      const store = transaction.objectStore(storeName);  // 获取对象存储
+      const request = store.get(key);  // 获取指定键额的数据
 
+      // 解析，返回数据或null
       request.onsuccess = (event) => {
-        resolve(event.target.result ? event.target.result.value : null);
+        const target = event.target as IDBRequest;
+        resolve(target.result ? target.result.value : null);
       };
 
       request.onerror = (event) => {
-        reject(event.target.error);
+        const target = event.target as IDBRequest;
+        reject(target.error);
       };
     });
   }
 
-  async function saveToDB(key, value) {
-    const db = await openDatabase();
+  // 异步函数，用于保存数据到数据库, 提示 Promise 不会返回任何值
+  async function saveToDB(key, value): Promise<void> {
+    const db = await openDatabase() as IDBDatabase;
     return new Promise((resolve, reject) => {
-      const transaction = db.transaction([storeName], 'readwrite');
-      const store = transaction.objectStore(storeName);
-      const request = store.put({ id: key, value });
+      const transaction = db.transaction([storeName], 'readwrite');  // 读写事务
+      const store = transaction.objectStore(storeName);   // 获取对象存储
+      const request = store.put({ id: key, value });  // 保存数据到对象存储
 
       request.onsuccess = () => {
         resolve();
       };
 
       request.onerror = (event) => {
-        reject(event.target.error);
+        reject((event.target as IDBRequest).error);
       };
     });
   }
 
+  // 使用 onMount 钩子，定义组件挂载时的逻辑
   onMount(async () => {
     // 页面加载时将光标聚焦到输入框
     const keepFocus = (event: FocusEvent) => {
-      event.preventDefault();
-      inputRef.focus();
+      if (event.target !== inputRef) {
+        event.preventDefault(); // 仅在目标不是输入框时，阻止默认失去焦点行为
+      }
+      inputRef.focus();   // 聚焦到输入框
     };
-    if (inputRef) {
+
+    if (inputRef) { // 判断输入框引用是否存在
       setTimeout(() => {
         inputRef.focus();
-      }, 0);
-      window.addEventListener('focusout', keepFocus);
+      }, 0); // 确保立即获得焦点
+      window.addEventListener('focusout', keepFocus);  // focusout 事件监听，保持输入框焦点
     }
+
+    // 记录滚动位置
     let lastPostion = window.scrollY;
     
+    // 添加滚动事件监听器
     window.addEventListener('scroll', () => {
-      const nowPostion = window.scrollY;
-      nowPostion < lastPostion && setStick(false);
-      lastPostion = nowPostion;
+      const nowPostion = window.scrollY;  // 获取当前滚动位置
+      nowPostion < lastPostion && setStick(false);  // 如果当前滚动位置小于上次位置，取消固定到底部
+      lastPostion = nowPostion;  // 更新
     });
 
-    try {
-      const storedMessageList = await getFromDB('messageList');
-      if (storedMessageList) {
+    try {  // 尝试从数据库加载数据
+
+      const storedMessageList = await getFromDB('messageList');  // 从数据库中获取存储的消息列表
+      if (storedMessageList) { 
         setMessageList(JSON.parse(storedMessageList));
       }
 
-      const storedSystemRoleSettings = await getFromDB('systemRoleSettings');
+      const storedSystemRoleSettings = await getFromDB('systemRoleSettings');  // 系统角色
       if (storedSystemRoleSettings) {
         setCurrentSystemRoleSettings(storedSystemRoleSettings);
       }
 
-      const storedStickToBottom = await getFromDB('stickToBottom');
+      const storedStickToBottom = await getFromDB('stickToBottom');   // 滑轮位置
       if (storedStickToBottom === 'stick') {
         setStick(true);
       }
@@ -123,12 +153,13 @@ export default () => {
       console.error(err);
     }
 
-    window.addEventListener('beforeunload', handleBeforeUnload);
-    onCleanup(() => {
+    window.addEventListener('beforeunload', handleBeforeUnload);  // 添加事件监听，页面关闭前保存状态
+    onCleanup(() => {  // 移除事件监听
       window.removeEventListener('beforeunload', handleBeforeUnload);
     });
   });
 
+  // 处理页面卸载前的保持逻辑
   const handleBeforeUnload = async () => {
     await saveToDB('messageList', JSON.stringify(messageList()));
     await saveToDB('systemRoleSettings', currentSystemRoleSettings());
@@ -140,6 +171,7 @@ export default () => {
     if (!inputValue) return;
 
     inputRef.value = '';
+    // 清空输入框
     const newMessageList = [
       ...messageList(),
       {
@@ -150,27 +182,31 @@ export default () => {
     setMessageList(newMessageList);
     await saveToDB('messageList', JSON.stringify(newMessageList));
     requestWithLatestMessage();
-    instantToBottom();
+    instantToBottom();  
   };
 
+  // 创建节流的平滑滚动到底部函数
   const smoothToBottom = useThrottleFn(() => {
     window.scrollTo({ top: document.body.scrollHeight, behavior: 'smooth' });
   }, 300, false, true);
 
+  // 立即滚动到底部
   const instantToBottom = () => {
     window.scrollTo({ top: document.body.scrollHeight, behavior: 'instant' });
   };
 
+  // 处理与服务器的交互
   const requestWithLatestMessage = async () => {
     setLoading(true);
     setCurrentAssistantMessage('');
     setCurrentError(null);
-    const storagePassword = localStorage.getItem('pass');
+    const storagePassword = localStorage.getItem('pass');  // 获取存储的密码
     try {
       const controller = new AbortController();
       setController(controller);
+      // 获取消息列表的最后几条消息，限制数量
       const requestMessageList = messageList().slice(-maxHistoryMessages);
-      if (currentSystemRoleSettings()) {
+      if (currentSystemRoleSettings()) {  // 如果有系统角色设置，添加到消息列表的开头
         requestMessageList.unshift({
           role: 'system',
           content: currentSystemRoleSettings(),
@@ -191,7 +227,7 @@ export default () => {
             m: requestMessageList?.[requestMessageList.length - 1]?.content || '',
           }),
           sessionId: token,
-          temperature: temperature(),
+          temperature: temperature(),  // 温度
         }),
         signal: controller.signal,
       });
@@ -203,11 +239,13 @@ export default () => {
       }
       const data = response.body;
       if (!data) throw new Error('No data');
+
+      // 创建读取器和解码器
       const reader = data.getReader();
       const decoder = new TextDecoder('utf-8');
       let done = false;
 
-      while (!done) {
+      while (!done) {  // 循环读取响应数据，解码并处理每一行
         const { value, done: readerDone } = await reader.read();
         if (value) {
           const chunk = decoder.decode(value, { stream: true });
@@ -236,11 +274,12 @@ export default () => {
       return;
     }
     archiveCurrentMessage();
-    isStick() && instantToBottom();
+    isStick() && instantToBottom();  // 滑轮固定到底部
   };
 
+  // 保存助手信息
   const archiveCurrentMessage = async () => {
-    if (currentAssistantMessage()) {
+    if (currentAssistantMessage()) {  // 如果有助手信息，将其添加到列表，然后重置状态
       const newMessageList = [
         ...messageList(),
         {
@@ -258,6 +297,7 @@ export default () => {
     }
   };
 
+  // 清空输入框、消息列表和错误信息
   const clear = async () => {
     inputRef.value = '';
     inputRef.style.height = 'auto';
@@ -267,6 +307,7 @@ export default () => {
     setCurrentError(null);
   };
 
+  // 终止当前请求并保存晓鑫
   const stopStreamFetch = () => {
     if (controller()) {
       controller().abort();
@@ -278,11 +319,12 @@ export default () => {
     if (messageList().length > 0) {
       const lastMessage = messageList()[messageList().length - 1];
       if (lastMessage.role === 'assistant')
-        setMessageList(messageList().slice(0, -1));
-      requestWithLatestMessage();
+        setMessageList(messageList().slice(0, -1));  // 如果最后一条信息是助手的消息，从列表删除
+      requestWithLatestMessage();  // 重新发送请求处理最新消息
     }
   };
 
+  // 输入输入框的键盘按下事件，回车键
   const handleKeydown = (e: KeyboardEvent) => {
     if (e.isComposing || e.shiftKey) return;
 
