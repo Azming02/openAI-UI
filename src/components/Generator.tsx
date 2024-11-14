@@ -110,11 +110,13 @@ export default () => {
   onMount(async () => {
     // 页面加载时将光标聚焦到输入框
     const keepFocus = (event: FocusEvent) => {
-      if (event.target !== inputRef) {
-        event.preventDefault(); // 仅在目标不是输入框时，阻止默认失去焦点行为
-      }
-      inputRef.focus();   // 聚焦到输入框
-    };
+      const target = event.target as HTMLElement; // 将事件目标转换为 HTMLElement
+      // 如果点击的元素是特殊按钮，则不聚焦输入框
+    if (event.target !== inputRef && !target.classList.contains('allow-focus')) {
+      // event.preventDefault();  //阻止按键的默认行为
+      inputRef.focus();
+    }
+  };
 
     if (inputRef) { // 判断输入框引用是否存在
       setTimeout(() => {
@@ -216,7 +218,8 @@ export default () => {
       const params = new URLSearchParams(window.location.search);
       const token = params.get('token');
 
-      const response = await fetch('https://rag.addcn.com/v1/chat/completions', {
+      // const response = await fetch('https://rag.addcn.com/v1/chat/completions', {
+      const response = await fetch('http://192.168.22.33:5000/v1/chat/completions', {
         method: 'POST',
         body: JSON.stringify({
           messages: requestMessageList,
@@ -307,7 +310,7 @@ export default () => {
     setCurrentError(null);
   };
 
-  // 终止当前请求并保存晓鑫
+  // 终止当前请求并保存消息
   const stopStreamFetch = () => {
     if (controller()) {
       controller().abort();
