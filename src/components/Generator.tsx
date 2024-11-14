@@ -119,9 +119,12 @@ export default () => {
   };
 
     if (inputRef) { // 判断输入框引用是否存在
-      setTimeout(() => {
+      // setTimeout(() => {
+        // inputRef.focus();
+      // }, 0); // 确保立即获得焦点
+      requestAnimationFrame(() => {  // 完成所有渲染后尝试聚焦输入框
         inputRef.focus();
-      }, 0); // 确保立即获得焦点
+      });
       window.addEventListener('focusout', keepFocus);  // focusout 事件监听，保持输入框焦点
     }
 
@@ -218,8 +221,8 @@ export default () => {
       const params = new URLSearchParams(window.location.search);
       const token = params.get('token');
 
-      // const response = await fetch('https://rag.addcn.com/v1/chat/completions', {
-      const response = await fetch('http://192.168.22.33:5000/v1/chat/completions', {
+      const response = await fetch('https://rag.addcn.com/v1/chat/completions', {
+      // const response = await fetch('http://192.168.22.33:5000/v1/chat/completions', {
         method: 'POST',
         body: JSON.stringify({
           messages: requestMessageList,
