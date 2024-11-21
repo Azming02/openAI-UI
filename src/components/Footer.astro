@@ -26,14 +26,31 @@
   </p>
   <script>
   // 修改数据管理的 url
+  function get_url_params(){
+    var url = window.location.href
+    var url_params = url.split("?")[1]
+    var url_params_dict = {}
+    if(url_params){
+        var url_params_list = url_params.split("&")
+        for (var i = 0; i < url_params_list.length; i++) {
+            var key_value = url_params_list[i].split("=")
+            url_params_dict[key_value[0]] = key_value[1]
+        }
+    }
+    return url_params_dict
+}
     document.addEventListener('DOMContentLoaded', () => {
-      const params = new URLSearchParams(window.location.search);
-      const token = params.get('token');
+      const params = get_url_params()
+      // const params = new URLSearchParams(window.location.search);
+      // const token = params.get('token');
+      const token = params["token"]
       console.log('token', token)
       if (token) {
         const dataManagementLink = document.getElementById('data-management-link');
         const newUrl = `${dataManagementLink.href}?token=${token}`;
         dataManagementLink.href = newUrl;
+        console.log('newUrl', newUrl)
+        console.log('dataManagementLink.href', dataManagementLink.href)
       }
     });
   </script>
