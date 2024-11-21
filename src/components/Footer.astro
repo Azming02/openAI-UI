@@ -7,6 +7,14 @@
     >
       意见反馈
     </a>
+    <a
+      {/* b-slate-link */}
+      id="data-management-link"
+      style="border-bottom: 1px solid slategray; color: bule;"
+      href="https://rag.addcn.com/static/index.html" target="_blank"
+    >
+      | 数据管理
+    </a>
     <span px-1> | 致敬:</span>
     <a
       b-slate-link
@@ -15,5 +23,17 @@
       chatgpt-demo
     </a>
   </p>
-
+  <script>
+  // 修改数据管理的 url
+    document.addEventListener('DOMContentLoaded', () => {
+      const params = new URLSearchParams(window.location.search);
+      const token = params.get('token');
+      
+      if (token) {
+        const dataManagementLink = document.getElementById('data-management-link');
+        const newUrl = `${dataManagementLink.href}?token=${token}`;
+        dataManagementLink.href = newUrl;
+      }
+    });
+  </script>
 </footer>
